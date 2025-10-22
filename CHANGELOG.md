@@ -89,6 +89,9 @@ These changes are available on the `master` branch, but have not yet been releas
   parameters. ([#2952](https://github.com/Pycord-Development/pycord/pull/2952))
 - Fixed autocomplete crashing when using an async staticmethod.
   ([#2966](https://github.com/Pycord-Development/pycord/pull/2966))
+- Fixed attributes like :attr:`Member.display_banner` being `None` when the member has
+  no guild specific banner, but does have a global one.
+  ([#2968](https://github.com/Pycord-Development/pycord/pull/2949))
 
 ### Deprecated
 
@@ -104,6 +107,8 @@ These changes are available on the `master` branch, but have not yet been releas
 
 ### Added
 
+- Added `positional` argument to `commands.Flag`.
+  ([#2443](https://github.com/Pycord-Development/pycord/pull/2443))
 - Added `Guild.fetch_role` method.
   ([#2528](https://github.com/Pycord-Development/pycord/pull/2528))
 - Added the following `AppInfo` attributes: `approximate_guild_count`,
