@@ -50,11 +50,13 @@ from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .iterators import HistoryIterator, MessagePinIterator
 from .mentions import AllowedMentions
+from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .scheduled_events import ScheduledEvent
 from .sticker import GuildSticker, StickerItem
+from .utils import warn_deprecated
 from .voice_client import VoiceClient, VoiceProtocol
 
 __all__ = (
@@ -1207,6 +1209,8 @@ class GuildChannel:
         target_type: InviteTarget | None = None,
         target_user: User | None = None,
         target_application_id: int | None = None,
+        roles: list[Role | Object] | None = None,
+        target_users_file: File | None = None,
     ) -> Invite:
         """|coro|
 
@@ -1258,6 +1262,20 @@ class GuildChannel:
 
             .. versionadded:: 2.0
 
+        roles: Optional[List[Union[:class:`.Role`, :class:`.Object`]]]
+            The roles to give a user when joining through this invite.
+
+            You must have the :attr:`~Permissions.manage_roles` permission to do this and roles cannot be higher than your own.
+
+            .. versionadded:: 2.8
+
+        target_users_file: Optional[:class:`File`]
+            A CSV file with a single column of user IDs for all the users able to accept this invite.
+
+            You can use :func:`utils.users_to_csv` to generate a virtual CSV file from a sequence of user IDs.
+
+            .. versionadded:: 2.8
+
         Returns
         -------
         :class:`~discord.Invite`
@@ -1282,8 +1300,11 @@ class GuildChannel:
             target_type=target_type.value if target_type else None,
             target_user_id=target_user.id if target_user else None,
             target_application_id=target_application_id,
+            roles=[str(r.id) for r in roles] if roles else None,
+            target_users_file=target_users_file,
         )
         invite = Invite.from_incomplete(data=data, state=self._state)
+
         if target_event:
             invite.set_scheduled_event(target_event)
         return invite
@@ -1358,6 +1379,7 @@ class Messageable:
         view: BaseView = ...,
         poll: Poll = ...,
         suppress: bool = ...,
+        suppress_embeds: bool = ...,
         silent: bool = ...,
     ) -> Message: ...
 
@@ -1379,6 +1401,7 @@ class Messageable:
         view: BaseView = ...,
         poll: Poll = ...,
         suppress: bool = ...,
+        suppress_embeds: bool = ...,
         silent: bool = ...,
     ) -> Message: ...
 
@@ -1400,6 +1423,7 @@ class Messageable:
         view: BaseView = ...,
         poll: Poll = ...,
         suppress: bool = ...,
+        suppress_embeds: bool = ...,
         silent: bool = ...,
     ) -> Message: ...
 
@@ -1421,6 +1445,7 @@ class Messageable:
         view: BaseView = ...,
         poll: Poll = ...,
         suppress: bool = ...,
+        suppress_embeds: bool = ...,
         silent: bool = ...,
     ) -> Message: ...
 
@@ -1443,6 +1468,7 @@ class Messageable:
         view=None,
         poll=None,
         suppress=None,
+        suppress_embeds=None,
         silent=None,
     ):
         """|coro|
@@ -1521,6 +1547,12 @@ class Messageable:
             .. versionadded:: 2.0
         suppress: :class:`bool`
             Whether to suppress embeds for the message.
+
+            .. deprecated:: 2.8
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message.
+
+            .. versionadded:: 2.8
         silent: :class:`bool`
             Whether to suppress push and desktop notifications for the message.
 
@@ -1568,8 +1600,13 @@ class Messageable:
                 )
             embeds = [embed.to_dict() for embed in embeds]
 
+        if suppress is not None:
+            warn_deprecated("suppress", "suppress_embeds", "2.8")
+            if suppress_embeds is None:
+                suppress_embeds = suppress
+
         flags = MessageFlags(
-            suppress_embeds=bool(suppress),
+            suppress_embeds=bool(suppress_embeds),
             suppress_notifications=bool(silent),
         )
 
