@@ -102,6 +102,7 @@ if TYPE_CHECKING:
 __all__ = (
     "Attachment",
     "Message",
+    "MessagePin",
     "PartialMessage",
     "MessageReference",
     "MessageCall",
@@ -1389,7 +1390,7 @@ class Message(Hashable):
             "interaction",
             "interaction_metadata",
             "2.6",
-            reference="https://discord.com/developers/docs/change-log#userinstallable-apps-preview",
+            reference="https://docs.discord.com/developers/change-log#user-installable-apps-preview",
         )
         return self._interaction
 
@@ -1399,7 +1400,7 @@ class Message(Hashable):
             "interaction",
             "interaction_metadata",
             "2.6",
-            reference="https://discord.com/developers/docs/change-log#userinstallable-apps-preview",
+            reference="https://docs.discord.com/developers/change-log#user-installable-apps-preview",
         )
         self._interaction = value
 
@@ -1917,7 +1918,7 @@ class Message(Hashable):
 
         if view and not view.is_finished():
             view.message = message
-            view.refresh(message.components)
+            view._refresh(message.components)
             if view.is_dispatchable():
                 self._state.store_view(view, self.id)
 
@@ -2586,7 +2587,7 @@ class PartialMessage(Hashable):
             msg = self._state.create_message(channel=self.channel, data=data)  # type: ignore
             if view and not view.is_finished():
                 view.message = msg
-                view.refresh(msg.components)
+                view._refresh(msg.components)
                 if view.is_dispatchable():
                     self._state.store_view(view, self.id)
             return msg
